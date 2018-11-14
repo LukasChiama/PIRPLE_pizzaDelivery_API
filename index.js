@@ -80,7 +80,8 @@ const server = http.createServer(function(req, res){
  const router = {
   'users': routeHandlers.users,
   'tokens': routeHandlers.tokens,
-  'checks': routeHandlers.checks
+  'menu': routeHandlers.menu,
+  'shop': routeHandlers.shop,
 }
 
 //start up server and set it listen on port 2000
