@@ -7,8 +7,8 @@ const http = require('http');
 const https = require('https');
 const url = require('url');
 const Decoder = require('string_decoder').StringDecoder;
-const routerHandlers = require('./lib/routeHandlers');
-
+const routeHandlers = require('./lib/routeHandlers');
+const aux = require('./lib/auxFunctions')
 
 
 //create http server function
@@ -20,7 +20,7 @@ const server = http.createServer(function(req, res){
   const queryString = parsedUrl.query;
 
   //get path name from parsed url 
-  const pathName = parsedUrl.path;
+  const pathName = parsedUrl.pathname;
 
   //trim path name of non-necessities
   const trimmedName = pathName.replace(/^\/+|\/+$/g, '');
@@ -46,15 +46,15 @@ const server = http.createServer(function(req, res){
     payloadString += decoder.end();
 
     //get selected router, default to not found if a non-existent route is selected
-    const selectedRouter = typeof router[trimmedName] !== undefined ? router[trimmedName] : routeHandlers.pathNotFound;
+    const selectedRouter = typeof router[trimmedName] !== 'undefined' ? router[trimmedName] : routeHandlers.pathNotFound;
 
     //fill the data object with information gotten from request
-    data = {
+    const data = {
       'trimmedName': trimmedName,
       'queryString': queryString,
       'method': method,
       'headers': headers,
-      'payload': payloadString,
+      'payload': aux.parseJsonToObject(payloadString),
 
     }
 
@@ -70,7 +70,7 @@ const server = http.createServer(function(req, res){
       res.writeHead(statusCode);
       res.end(payloadString);
 
-      console.log('The server is running on port 2000 with these responses: ', statusCode, queryString)
+      console.log('The server is running on port 2000 with these responses: ', statusCode, trimmedName)
     })
 
   })
