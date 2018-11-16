@@ -1,5 +1,5 @@
-.data/users
+.data/shoppingCart/
+.data/tokens/
+.data/users/
 .env
-lib/config/
-https/certificate.pem/
-https/key.pem/
+https/

@@ -8,9 +8,21 @@ const https = require('https');
 const url = require('url');
 const Decoder = require('string_decoder').StringDecoder;
 const fs = require("fs");
+const path = require("path");
 const routeHandlers = require('./lib/routeHandlers');
 const aux = require('./lib/auxFunctions');
-const config = require('./lib/config');
+
+
+//define .env file and make it a global variable populated with API Keys, hashing secret for tokens and other secrets needed for the code
+const envFile = path.resolve(__dirname, '.env')
+//after getting the file, read the fikle contents,
+//then make them keys and values of the node.js global process.env
+const envVariables = fs.readFileSync(envFile, 'utf-8').split('\n')
+envVariables.reduce((acc, item) => {
+  const [key, value] = item.split('=');
+  process.env[key] = value.replace("\r", '');
+  return acc;
+}, {})
 
 
 //instantiate the https server
@@ -24,8 +36,8 @@ httpsOptions = {
 };
 
 //start up the https server
-httpsServer.listen(config.httpsPort, function(){
-  console.log('HTTPS server started and running on port '+ config.httpsPort);
+httpsServer.listen(+process.env.HttpsPort, function () {
+  console.log(`HTTPS server started and running on port ${+process.env.HttpsPort}`);
 })
 
 //create http server function
@@ -34,13 +46,13 @@ const httpServer = http.createServer(
 
 
 //start up  the http server
-httpServer.listen(config.httpPort, function(){
-  console.log('HTTP server started and running on port '+ config.httpPort);
+httpServer.listen(+process.env.HttpPort, function () {
+  console.log(`HTTP server started and running on port ${+process.env.HttpPort}`);
 })
 
 
 //all server logic goes in here
-const unifiedServer = function(req, res) {
+const unifiedServer = function (req, res) {
   //get url user is navigating to
   const parsedUrl = url.parse(req.url, true);
 
@@ -60,17 +72,17 @@ const unifiedServer = function(req, res) {
 
   //initialize user's payload to a string
   let payloadString = '';
-  
+
   //initialize decoder for payload;
   const decoder = new Decoder('utf-8')
 
-  req.on('data', function(data){
+  req.on('data', function (data) {
     payloadString += decoder.write(data);
 
   })
 
-  
-  req.on('end', function(){
+
+  req.on('end', function () {
     payloadString += decoder.end();
 
     //get selected router, default to not found if a non-existent route is selected
@@ -87,7 +99,7 @@ const unifiedServer = function(req, res) {
     }
 
     //construct function for selected router with data object to get JSON payload and status code
-    selectedRouter(data, function(statusCode, payload){
+    selectedRouter(data, function (statusCode, payload) {
       statusCode = typeof statusCode === 'number' ? statusCode : 200;
       payload = typeof payload === 'object' ? payload : {};
 
@@ -105,7 +117,7 @@ const unifiedServer = function(req, res) {
 }
 
 //define available routes and their handlers
- const router = {
+const router = {
   'users': routeHandlers.users,
   'tokens': routeHandlers.tokens,
   'menu': routeHandlers.menu,
