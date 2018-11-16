@@ -7,12 +7,40 @@ const http = require('http');
 const https = require('https');
 const url = require('url');
 const Decoder = require('string_decoder').StringDecoder;
+const fs = require("fs");
 const routeHandlers = require('./lib/routeHandlers');
-const aux = require('./lib/auxFunctions')
+const aux = require('./lib/auxFunctions');
+const config = require('./lib/config');
 
+
+//instantiate the https server
+const httpsServer = https.createServer(
+  (req, res) => unifiedServer(req, res))
+
+//read from key and certificate for https route
+httpsOptions = {
+  'key': fs.readFileSync('./https/key.pem'),
+  'cert': fs.readFileSync('./https/certificate.pem')
+};
+
+//start up the https server
+httpsServer.listen(config.httpsPort, function(){
+  console.log('HTTPS server started and running on port '+ config.httpsPort);
+})
 
 //create http server function
-const server = http.createServer(function(req, res){
+const httpServer = http.createServer(
+  (req, res) => unifiedServer(req, res));
+
+
+//start up  the http server
+httpServer.listen(config.httpPort, function(){
+  console.log('HTTP server started and running on port '+ config.httpPort);
+})
+
+
+//all server logic goes in here
+const unifiedServer = function(req, res) {
   //get url user is navigating to
   const parsedUrl = url.parse(req.url, true);
 
@@ -70,11 +98,11 @@ const server = http.createServer(function(req, res){
       res.writeHead(statusCode);
       res.end(payloadString);
 
-      console.log('The server is running on port 2000 with these responses: ', statusCode, trimmedName)
+      console.log('The server is running with this response: ', statusCode)
     })
 
   })
-})
+}
 
 //define available routes and their handlers
  const router = {
@@ -82,9 +110,5 @@ const server = http.createServer(function(req, res){
   'tokens': routeHandlers.tokens,
   'menu': routeHandlers.menu,
   'shop': routeHandlers.shop,
+  'checkout': routeHandlers.checkout
 }
-
-//start up server and set it listen on port 2000
-server.listen(2000, function(){
-  console.log('server started and running on port 2000');
-})
