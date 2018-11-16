@@ -2,5 +2,4 @@
 .data/tokens/
 .data/users/
 .env
-/https/certificate.pem
-https/key.pem
+https/
