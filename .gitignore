@@ -1,4 +1,5 @@
-.data/
+.data/users
 .env
 lib/config/
-https/
+https/certificate.pem/
+https/key.pem/
